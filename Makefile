@@ -186,12 +186,12 @@ restart:
 
 .PHONY: mv-logs
 mv-logs:
-	$(eval when := $(shell date "+%s"))
+	$(eval when := $(shell date +"%M_%H_%d_%m_%Y"))
 	mkdir -p ./logs/$(when)
 	sudo test -f $(NGINX_LOG) && \
-		sudo mv -f $(NGINX_LOG) ./logs/$(when)/nginx || echo ""
+		sudo mv -f $(NGINX_LOG) ./$(SERVER_ID)/logs/$(when)/nginx || echo ""
 	sudo test -f $(DB_SLOW_LOG) && \
-		sudo mv -f $(DB_SLOW_LOG) ./logs/$(when)/mysql || echo ""
+		sudo mv -f $(DB_SLOW_LOG) ./$(SERVER_ID)/logs/$(when)/mysql || echo ""
 
 .PHONY: watch-service-log
 watch-service-log:
