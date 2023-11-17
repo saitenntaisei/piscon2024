@@ -46,12 +46,6 @@ slow-query:
 alp:
 	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml
 
-.PHONY: analyze
-analyze:
-	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL)
--s -o /dev/null
-	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml |  curl -X POST -d -@ $(WEBHOOK_URL)
-
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
@@ -62,6 +56,11 @@ pprof-record:
 pprof-check:
 	$(eval latest := $(shell ls -rt pprof/ | tail -n 1))
 	go tool pprof -http=localhost:8090 pprof/$(latest)
+
+.PHONY: analyze
+analyze:
+	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
+	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml |  curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
 .PHONY: access-db
