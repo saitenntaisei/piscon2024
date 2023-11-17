@@ -94,7 +94,7 @@ stat:
 
 .PHONY: set-nginx-alp-ltsv
 set-nginx-alp-ltsv:
-	@sudo sed  -i '/http {/a\\    log_format ltsv \"time:^$time_local\"\n\t\t    \"\\thost:^$remote_addr\"\n\t\t    \"\\tforwardedfor:^$http_x_forwarded_for\"\n\t\t    \"\\treq:^$request\"\n\t\t    \"\\tstatus:^$status\"\n\t\t    \"\\tmethod:^$request_method\"\n\t\t    \"\\turi:^$request_uri\"\n\t\t    \"\\tsize:^$body_bytes_sent\"\n\t\t    \"\\treferer:^$http_referer\"\n\t\t    \"\\tua:^$http_user_agent\"\n\t\t    \"\\treqtime:^$request_time\"\n\t\t    \"\\tcache:^$upstream_http_x_cache\"\n\t\t    \"\\truntime:^$upstream_http_x_runtime\"\n\t\t    \"\\tapptime:^$upstream_response_time\"\n\t\t    \"\\tvhost:^$host\";\n' /etc/nginx/nginx.conf
+	@sudo sed -i '/http {/a\\    log_format ltsv \"time:\$$time_local\"\n\t\t    \"\\thost:\$$remote_addr\"\n\t\t    \"\\tforwardedfor:\$$http_x_forwarded_for\"\n\t\t    \"\\treq:\$$request\"\n\t\t    \"\\tstatus:\$$status\"\n\t\t    \"\\tmethod:\$$request_method\"\n\t\t    \"\\turi:\$$request_uri\"\n\t\t    \"\\tsize:\$$body_bytes_sent\"\n\t\t    \"\\treferer:\$$http_referer\"\n\t\t    \"\\tua:\$$http_user_agent\"\n\t\t    \"\\treqtime:\$$request_time\"\n\t\t    \"\\tcache:\$$upstream_http_x_cache\"\n\t\t    \"\\truntime:\$$upstream_http_x_runtime\"\n\t\t    \"\\tapptime:\$$upstream_response_time\"\n\t\t    \"\\tvhost:\$$host\";\n' /etc/nginx/nginx.conf
 	@sudo sed -i 's@access_log  /var/log/nginx/access.log  main;@access_log  /var/log/nginx/access.log  ltsv;@g' /etc/nginx/nginx.conf
 	sudo systemctl restart nginx.service
 
