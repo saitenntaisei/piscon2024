@@ -16,6 +16,7 @@ SYSTEMD_PATH:=/etc/systemd/system
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
 
+WEBHOOK_URL = https://discord.com/api/webhooks/1175019426396000296/6F9rMmDjObZInViXR47xJ4cU55RNjdH6CbsIQnF0tjCEHcGjFL0QFBDHRyezp-1ex8Pk
 
 # メインで使うコマンド ------------------------
 
@@ -45,6 +46,12 @@ slow-query:
 alp:
 	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml
 
+.PHONY: analyze
+analyze:
+	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL)
+-s -o /dev/null
+	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml |  curl -X POST -d -@ $(WEBHOOK_URL)
+
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
@@ -61,13 +68,37 @@ pprof-check:
 access-db:
 	mysql -h $(MYSQL_HOST) -P $(MYSQL_PORT) -u $(MYSQL_USER) -p$(MYSQL_PASS) $(MYSQL_DBNAME)
 
+.PHONY: slow-on
+slow-on:
+	sudo mysql -e "set global slow_query_log_file = '$(DB_SLOW_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
+	# sudo $(MYSQL_CMD) -e "set global slow_query_log_file = '$(DB_SLOW_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
+
+.PHONY: slow-off
+slow-off:
+	sudo mysql -e "set global slow_query_log = OFF;"
+	# sudo $(MYSQL_CMD) -e "set global slow_query_log = OFF;"
+
+
+
+.PHONY: stat
+stat:
+	@tmux split-window -h -p 50
+	@tmux split-window -v -p 50
+	@tmux select-pane -t 0
+	@tmux split-window -v -p 50
+	@tmux send-keys -t 0 "sudo journalctl -u $(SERVICE_NAME) -f" C-m
+	@tmux send-keys -t 2 "htop" C-m
+	@tmux send-keys -t 3 "dstat" C-m
+
 # 主要コマンドの構成要素 ------------------------
 
 .PHONY: install-tools
 install-tools:
 	sudo apt update
 	sudo apt upgrade
-	sudo apt install -y percona-toolkit dstat git unzip snapd graphviz tree
+	sudo apt install -y percona-toolkit dstat git unzip snapd graphviz tree htop
+	sudo apt install -y build-essential curl wget vim
+
 
 	# alpのインストール
 	wget https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_amd64.zip
@@ -78,8 +109,9 @@ install-tools:
 .PHONY: git-setup
 git-setup:
 	# git用の設定は適宜変更して良い
-	git config --global user.email "isucon@example.com"
-	git config --global user.name "isucon"
+	git config --global user.name "server"
+	git config --global user.email "github-actions[bot]@users.noreply.github.com"
+	git config --global init.defaultbranch main
 
 	# deploykeyの作成
 	ssh-keygen -t ed25519
