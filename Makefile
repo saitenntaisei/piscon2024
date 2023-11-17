@@ -138,38 +138,38 @@ set-as-s3:
 
 .PHONY: get-db-conf
 get-db-conf:
-	sudo cp -R $(DB_PATH)/* ~/$(SERVER_ID)/etc/mysql
-	sudo chown $(USER) -R ~/$(SERVER_ID)/etc/mysql
+	sudo cp -R $(DB_PATH)/* ./$(SERVER_ID)/etc/mysql
+	sudo chown $(USER) -R ./$(SERVER_ID)/etc/mysql
 
 .PHONY: get-nginx-conf
 get-nginx-conf:
-	sudo cp -R $(NGINX_PATH)/* ~/$(SERVER_ID)/etc/nginx
-	sudo chown $(USER) -R ~/$(SERVER_ID)/etc/nginx
+	sudo cp -R $(NGINX_PATH)/* ./$(SERVER_ID)/etc/nginx
+	sudo chown $(USER) -R ./$(SERVER_ID)/etc/nginx
 
 .PHONY: get-service-file
 get-service-file:
-	sudo cp $(SYSTEMD_PATH)/$(SERVICE_NAME) ~/$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME)
-	sudo chown $(USER) ~/$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME)
+	sudo cp $(SYSTEMD_PATH)/$(SERVICE_NAME) ./$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME)
+	sudo chown $(USER) ./$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME)
 
 .PHONY: get-envsh
 get-envsh:
-	cp ~/env.sh ~/$(SERVER_ID)/home/isucon/env.sh
+	cp ~/env.sh ./$(SERVER_ID)/home/isucon/env.sh
 
 .PHONY: deploy-db-conf
 deploy-db-conf:
-	sudo cp -R ~/$(SERVER_ID)/etc/mysql/* $(DB_PATH)
+	sudo cp -R ./$(SERVER_ID)/etc/mysql/* $(DB_PATH)
 
 .PHONY: deploy-nginx-conf
 deploy-nginx-conf:
-	sudo cp -R ~/$(SERVER_ID)/etc/nginx/* $(NGINX_PATH)
+	sudo cp -R ./$(SERVER_ID)/etc/nginx/* $(NGINX_PATH)
 
 .PHONY: deploy-service-file
 deploy-service-file:
-	sudo cp ~/$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME) $(SYSTEMD_PATH)/$(SERVICE_NAME)
+	sudo cp ./$(SERVER_ID)/etc/systemd/system/$(SERVICE_NAME) $(SYSTEMD_PATH)/$(SERVICE_NAME)
 
 .PHONY: deploy-envsh
 deploy-envsh:
-	cp ~/$(SERVER_ID)/home/isucon/env.sh ~/env.sh
+	cp ./$(SERVER_ID)/home/isucon/env.sh ~/env.sh
 
 .PHONY: build
 build:
@@ -186,11 +186,11 @@ restart:
 .PHONY: mv-logs
 mv-logs:
 	$(eval when := $(shell date "+%s"))
-	mkdir -p ~/logs/$(when)
+	mkdir -p ./logs/$(when)
 	sudo test -f $(NGINX_LOG) && \
-		sudo mv -f $(NGINX_LOG) ~/logs/nginx/$(when)/ || echo ""
+		sudo mv -f $(NGINX_LOG) ./logs/nginx/$(when)/ || echo ""
 	sudo test -f $(DB_SLOW_LOG) && \
-		sudo mv -f $(DB_SLOW_LOG) ~/logs/mysql/$(when)/ || echo ""
+		sudo mv -f $(DB_SLOW_LOG) ./logs/mysql/$(when)/ || echo ""
 
 .PHONY: watch-service-log
 watch-service-log:
