@@ -18,6 +18,7 @@ DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
 
 WEBHOOK_URL = https://discord.com/api/webhooks/1175019426396000296/6F9rMmDjObZInViXR47xJ4cU55RNjdH6CbsIQnF0tjCEHcGjFL0QFBDHRyezp-1ex8Pk
 
+SERVER_ID=s1
 # メインで使うコマンド ------------------------
 
 # サーバーの環境構築　ツールのインストール、gitまわりのセットアップ
