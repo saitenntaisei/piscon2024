@@ -46,7 +46,7 @@ slow-query:
 # alpでアクセスログを確認する
 .PHONY: alp
 alp:
-	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml
+	sudo alp ltsv --file=$(NGINX_LOG)
 
 # pprofで記録する
 .PHONY: pprof-record
@@ -61,7 +61,7 @@ pprof-check:
 
 .PHONY: analyze
 analyze:
-	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml |  curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
+	sudo alp ltsv --file=$(NGINX_LOG) |  curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 
