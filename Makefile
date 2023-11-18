@@ -61,9 +61,12 @@ pprof-check:
 
 .PHONY: analyze
 analyze:
-	sudo alp ltsv --file=$(NGINX_LOG) |  curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
-	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
-	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
+	sudo alp ltsv --file=$(NGINX_LOG) > /temp/alp.txt
+	-@curl -X POST -F txt=@/temp/alp.txt $(WEBHOOK_URL) -s -o /dev/null
+	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) > /temp/mysqldumpslow.txt
+	-@curl -X POST -F txt=@/temp/mysqldumpslow.txt $(WEBHOOK_URL) -s -o /dev/null
+	sudo pt-query-digest --limit 15 --type slowlog $(DB_SLOW_LOG) > /temp/pt-query-digest.txt
+	-@curl -X POST -F txt=@/temp/pt-query-digest.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
 .PHONY: access-db
