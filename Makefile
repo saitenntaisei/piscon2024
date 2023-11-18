@@ -205,7 +205,9 @@ mv-logs:
 	sudo systemctl restart nginx.service
 	sudo test -f $(DB_SLOW_LOG) && \
 		sudo mv -f $(DB_SLOW_LOG) ./$(SERVER_ID)/logs/$(when)/mysql || echo ""
-	slow-on
+	sudo touch $(DB_SLOW_LOG)
+	sudo chmod 777 $(DB_SLOW_LOG)
+	sudo systemctl restart mysql.service
 
 .PHONY: watch-service-log
 watch-service-log:
