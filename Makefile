@@ -34,7 +34,7 @@ deploy-conf: check-server-id deploy-db-conf deploy-nginx-conf deploy-service-fil
 
 # ベンチマークを走らせる直前に実行する
 .PHONY: bench
-bench: check-server-id mv-logs build deploy-conf restart watch-service-log
+bench: check-server-id mv-logs build slow-on restart 
 
 # slow queryを確認する
 .PHONY: slow-query
@@ -138,7 +138,7 @@ endif
 
 .PHONY: set-as-s1
 set-as-s1:
-	echo "SERVER_ID=s1" >> \$$HOME/env.sh
+	echo "SERVER_ID=s1" >> ~/env.sh
 
 .PHONY: set-as-s2
 set-as-s2:
@@ -207,7 +207,7 @@ mv-logs:
 		sudo mv -f $(DB_SLOW_LOG) ./$(SERVER_ID)/logs/$(when)/mysql || echo ""
 	sudo touch $(DB_SLOW_LOG)
 	sudo chmod 777 $(DB_SLOW_LOG)
-	sudo systemctl restart mysql.service
+	sudo systemctl restart mysql
 
 .PHONY: watch-service-log
 watch-service-log:
