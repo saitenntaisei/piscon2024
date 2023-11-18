@@ -18,12 +18,11 @@ DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
 
 WEBHOOK_URL = https://discord.com/api/webhooks/1175019426396000296/6F9rMmDjObZInViXR47xJ4cU55RNjdH6CbsIQnF0tjCEHcGjFL0QFBDHRyezp-1ex8Pk
 
-SERVER_ID=s1
 # メインで使うコマンド ------------------------
 
 # サーバーの環境構築　ツールのインストール、gitまわりのセットアップ
 .PHONY: setup
-setup: install-tools git-setup set-nginx-alp-ltsv
+setup: install-tools git-setup set-nginx-alp-ltsv 
 
 # 設定ファイルなどを取得してgit管理下に配置する
 .PHONY: get-conf
@@ -139,7 +138,7 @@ endif
 
 .PHONY: set-as-s1
 set-as-s1:
-	echo "SERVER_ID=s1" >> env.sh
+	echo "SERVER_ID=s1" >> \$$HOME/env.sh
 
 .PHONY: set-as-s2
 set-as-s2:
@@ -203,9 +202,10 @@ mv-logs:
 	sudo test -f $(NGINX_LOG) && \
 		sudo mv -f $(NGINX_LOG) ./$(SERVER_ID)/logs/$(when)/nginx || echo ""
 	sudo touch $(NGINX_LOG)
+	sudo systemctl restart nginx.service
 	sudo test -f $(DB_SLOW_LOG) && \
 		sudo mv -f $(DB_SLOW_LOG) ./$(SERVER_ID)/logs/$(when)/mysql || echo ""
-	sudo touch $(DB_SLOW_LOG)
+	slow-on
 
 .PHONY: watch-service-log
 watch-service-log:
