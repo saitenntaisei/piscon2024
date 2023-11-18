@@ -40,8 +40,9 @@ bench: check-server-id mv-logs build deploy-conf restart watch-service-log
 # slow queryを確認する
 .PHONY: slow-query
 slow-query:
+	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) 
 	sudo pt-query-digest $(DB_SLOW_LOG)
-
+	
 # alpでアクセスログを確認する
 .PHONY: alp
 alp:
@@ -60,8 +61,9 @@ pprof-check:
 
 .PHONY: analyze
 analyze:
-	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 	sudo alp ltsv --file=$(NGINX_LOG) --config=/home/isucon/tool-config/alp/config.yml |  curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
+	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
+	sudo pt-query-digest $(DB_SLOW_LOG) | curl -X POST -d -@ $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
 .PHONY: access-db
@@ -196,8 +198,10 @@ mv-logs:
 	mkdir -p ./$(SERVER_ID)/logs/$(when)
 	sudo test -f $(NGINX_LOG) && \
 		sudo mv -f $(NGINX_LOG) ./$(SERVER_ID)/logs/$(when)/nginx || echo ""
+	sudo touch $(NGINX_LOG)
 	sudo test -f $(DB_SLOW_LOG) && \
 		sudo mv -f $(DB_SLOW_LOG) ./$(SERVER_ID)/logs/$(when)/mysql || echo ""
+	sudo touch $(DB_SLOW_LOG)
 
 .PHONY: watch-service-log
 watch-service-log:
