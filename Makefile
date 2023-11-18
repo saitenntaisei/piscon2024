@@ -61,9 +61,10 @@ pprof-check:
 
 .PHONY: analyze
 analyze:
+	sudo mkdir -p /temp && sudo chmod 777 /temp
 	sudo alp ltsv --file=$(NGINX_LOG) > /temp/alp.txt
 	-@curl -X POST -F txt=@/temp/alp.txt $(WEBHOOK_URL) -s -o /dev/null
-	sudo mysqldumpslow -s t -t 10 $(MYSQL_LOG) > /temp/mysqldumpslow.txt
+	sudo mysqldumpslow -s t -t 10 $(DB_SLOW_LOG) > /temp/mysqldumpslow.txt
 	-@curl -X POST -F txt=@/temp/mysqldumpslow.txt $(WEBHOOK_URL) -s -o /dev/null
 	sudo pt-query-digest --limit 15 --type slowlog $(DB_SLOW_LOG) > /temp/pt-query-digest.txt
 	-@curl -X POST -F txt=@/temp/pt-query-digest.txt $(WEBHOOK_URL) -s -o /dev/null
