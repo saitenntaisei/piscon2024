@@ -26,7 +26,7 @@ WEBHOOK_URL = https://discord.com/api/webhooks/1175019426396000296/6F9rMmDjObZIn
 
 # サーバーの環境構築　ツールのインストール、gitまわりのセットアップ
 .PHONY: setup
-setup: install-tools git-setup set-nginx-alp-ltsv  netdata-setup
+setup: install-tools git-setup set-nginx-alp-ltsv  
 
 # 設定ファイルなどを取得してgit管理下に配置する
 .PHONY: get-conf
