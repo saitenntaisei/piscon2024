@@ -15,6 +15,7 @@ SYSTEMD_PATH:=/etc/systemd/system
 
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
+TBLS_VERSION:=1.71.1
 
 # http://localhost:19999/netdata.confのdirectories.webで確認可能
 NETDATA_WEBROOT_PATH:= /var/lib/netdata/www/
@@ -126,9 +127,9 @@ install-tools:
 	sudo install alp /usr/local/bin/alp
 	rm alp_linux_amd64.zip alp
 
-	export TBLS_VERSION=X.X.X
-	curl -o tbls.deb -L https://github.com/k1LoW/tbls/releases/download/v$TBLS_VERSION/tbls_$TBLS_VERSION-1_amd64.deb
+	curl -o tbls.deb -L https://github.com/k1LoW/tbls/releases/download/v$(TBLS_VERSION)/tbls_$(TBLS_VERSION)-1_amd64.deb
 	sudo dpkg -i tbls.deb
+	rm tbls.deb
 
 	# netdataのインストール
 	- wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry
