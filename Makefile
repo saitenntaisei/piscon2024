@@ -55,7 +55,7 @@ alp:
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
-	go tool pprof -top http://localhost:6060/debug/pprof/profile?seconds=60
+	go tool pprof -top http://localhost:6060/debug/pprof/profile?seconds=60 > /temp/pprof.txt
 
 # pprofで確認する
 .PHONY: pprof-check
@@ -72,6 +72,7 @@ analyze:
 	-@curl -X POST -F txt=@/temp/mysqldumpslow.txt $(WEBHOOK_URL) -s -o /dev/null
 	sudo pt-query-digest --limit 15 --type slowlog $(DB_SLOW_LOG) > /temp/pt-query-digest.txt
 	-@curl -X POST -F txt=@/temp/pt-query-digest.txt $(WEBHOOK_URL) -s -o /dev/null
+	-@curl -X POST -F txt=@/temp/pprof.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
 .PHONY: access-db
