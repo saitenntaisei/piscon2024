@@ -73,6 +73,11 @@ analyze:
 access-db:
 	mysql -h $(MYSQL_HOST) -P $(MYSQL_PORT) -u $(MYSQL_USER) -p$(MYSQL_PASS) $(MYSQL_DBNAME)
 
+# tbls
+.PHONY: tbls
+tbls:
+	tbls doc  --force mysql://$(MYSQL_USER):$(MYSQL_PASS)@$(MYSQL_HOST):$(MYSQL_PORT)/$(MYSQL_DBNAME)
+
 .PHONY: slow-on
 slow-on:
 	sudo mysql -e "set global slow_query_log_file = '$(DB_SLOW_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
