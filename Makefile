@@ -16,13 +16,17 @@ SYSTEMD_PATH:=/etc/systemd/system
 NGINX_LOG:=/var/log/nginx/access.log
 DB_SLOW_LOG:=/var/log/mysql/mariadb-slow.log
 
+# http://localhost:19999/netdata.confのdirectories.webで確認可能
+NETDATA_WEBROOT_PATH:= /var/lib/netdata/www/
+NETDATA_CUSTOM_HTML:= ./tool-config/netdata/*
+
 WEBHOOK_URL = https://discord.com/api/webhooks/1175019426396000296/6F9rMmDjObZInViXR47xJ4cU55RNjdH6CbsIQnF0tjCEHcGjFL0QFBDHRyezp-1ex8Pk
 
 # メインで使うコマンド ------------------------
 
 # サーバーの環境構築　ツールのインストール、gitまわりのセットアップ
 .PHONY: setup
-setup: install-tools git-setup set-nginx-alp-ltsv 
+setup: install-tools git-setup set-nginx-alp-ltsv  netdata-setup
 
 # 設定ファイルなどを取得してgit管理下に配置する
 .PHONY: get-conf
@@ -126,6 +130,9 @@ install-tools:
 	curl -o tbls.deb -L https://github.com/k1LoW/tbls/releases/download/v$TBLS_VERSION/tbls_$TBLS_VERSION-1_amd64.deb
 	dpkg -i tbls.deb
 
+	# netdataのインストール
+	- wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry
+
 .PHONY: git-setup
 git-setup:
 	# git用の設定は適宜変更して良い
@@ -221,3 +228,8 @@ mv-logs:
 .PHONY: watch-service-log
 watch-service-log:
 	sudo journalctl -u $(SERVICE_NAME) -n10 -f
+
+.PHONY: netdata-setup
+netdata-setup:
+	sudo cp -R $(NETDATA_CUSTOM_HTML) $(NETDATA_WEBROOT_PATH)
+	sudo systemctl restart netdata
