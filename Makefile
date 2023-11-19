@@ -55,7 +55,7 @@ alp:
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
-	go tool pprof http://localhost:6060/debug/pprof/profile?seconds=60
+	go tool pprof -top http://localhost:6060/debug/pprof/profile?seconds=60
 
 # pprofで確認する
 .PHONY: pprof-check
