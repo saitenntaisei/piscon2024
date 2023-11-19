@@ -122,6 +122,10 @@ install-tools:
 	sudo install alp /usr/local/bin/alp
 	rm alp_linux_amd64.zip alp
 
+	export TBLS_VERSION=X.X.X
+	curl -o tbls.deb -L https://github.com/k1LoW/tbls/releases/download/v$TBLS_VERSION/tbls_$TBLS_VERSION-1_amd64.deb
+	dpkg -i tbls.deb
+
 .PHONY: git-setup
 git-setup:
 	# git用の設定は適宜変更して良い
