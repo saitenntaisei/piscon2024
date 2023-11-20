@@ -56,11 +56,13 @@ alp:
 .PHONY: fgprof-record
 fgprof-record:
 	go tool pprof -top http://localhost:6060/debug/fgprof?seconds=60 > /temp/fgprof.txt
+	-@curl -X POST -F txt=@/temp/fgprof.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
 	go tool pprof -top http://localhost:6060/debug/pprof/profile?seconds=60 > /temp/pprof.txt
+	-@curl -X POST -F txt=@/temp/pprof.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # pprof or fgprofで確認する
 .PHONY: go-check
@@ -78,8 +80,7 @@ analyze:
 	-@curl -X POST -F txt=@/temp/mysqldumpslow.txt $(WEBHOOK_URL) -s -o /dev/null
 	sudo pt-query-digest --limit 15 --type slowlog $(DB_SLOW_LOG) > /temp/pt-query-digest.txt
 	-@curl -X POST -F txt=@/temp/pt-query-digest.txt $(WEBHOOK_URL) -s -o /dev/null
-	-@curl -X POST -F txt=@/temp/pprof.txt $(WEBHOOK_URL) -s -o /dev/null
-	-@curl -X POST -F txt=@/temp/fgprof.txt $(WEBHOOK_URL) -s -o /dev/null
+	
 
 # DBに接続する
 .PHONY: db
