@@ -52,6 +52,11 @@ slow-query:
 alp:
 	sudo alp ltsv --file=$(NGINX_LOG)  --config=./tool-config/alp/config.yaml
 
+# fgprofで記録する
+.PHONY: fgprof-record
+fgprof-record:
+	go tool pprof -top http://localhost:6060/debug/fgprof?seconds=60 > /temp/fgprof.txt
+
 # pprofで記録する
 .PHONY: pprof-record
 pprof-record:
@@ -62,6 +67,7 @@ pprof-record:
 pprof-check:
 	$(eval latest := $(shell ls -rt pprof/ | tail -n 1))
 	go tool pprof -http=localhost:8090 pprof/$(latest)
+	go tool pprof -http=localhost:8070 fgprof/$(latest)
 
 .PHONY: analyze
 analyze:
