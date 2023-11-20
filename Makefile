@@ -62,9 +62,9 @@ fgprof-record:
 pprof-record:
 	go tool pprof -top http://localhost:6060/debug/pprof/profile?seconds=60 > /temp/pprof.txt
 
-# pprofで確認する
-.PHONY: pprof-check
-pprof-check:
+# pprof or fgprofで確認する
+.PHONY: go-check
+go-check:
 	$(eval latest := $(shell ls -rt pprof/ | tail -n 1))
 	go tool pprof -http=localhost:8090 pprof/$(latest)
 	go tool pprof -http=localhost:8070 fgprof/$(latest)
@@ -79,6 +79,7 @@ analyze:
 	sudo pt-query-digest --limit 15 --type slowlog $(DB_SLOW_LOG) > /temp/pt-query-digest.txt
 	-@curl -X POST -F txt=@/temp/pt-query-digest.txt $(WEBHOOK_URL) -s -o /dev/null
 	-@curl -X POST -F txt=@/temp/pprof.txt $(WEBHOOK_URL) -s -o /dev/null
+	-@curl -X POST -F txt=@/temp/fgprof.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
 .PHONY: db
