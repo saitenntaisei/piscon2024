@@ -236,7 +236,4 @@ netdata-setup:
 	sudo cp -R $(NETDATA_CUSTOM_HTML) $(NETDATA_WEBROOT_PATH)
 	sudo systemctl restart netdata
 
-.PHONY: port-forward
-port-forward:
-	ssh -fN -L 19999:localhost:19999  isucon@163.43.144.13
-	ssh -fN -L 8090:localhost:8090  isucon@163.43.144.13
+
