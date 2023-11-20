@@ -75,8 +75,8 @@ analyze:
 	-@curl -X POST -F txt=@/temp/pprof.txt $(WEBHOOK_URL) -s -o /dev/null
 
 # DBに接続する
-.PHONY: access-db
-access-db:
+.PHONY: db
+db:
 	mysql -h $(MYSQL_HOST) -P $(MYSQL_PORT) -u $(MYSQL_USER) -p$(MYSQL_PASS) $(MYSQL_DBNAME)
 
 # tbls
@@ -235,3 +235,8 @@ watch-service-log:
 netdata-setup:
 	sudo cp -R $(NETDATA_CUSTOM_HTML) $(NETDATA_WEBROOT_PATH)
 	sudo systemctl restart netdata
+
+.PHONY: port-forward
+port-forward:
+	ssh -fN -L 19999:localhost:19999  isucon@163.43.144.13
+	ssh -fN -L 8090:localhost:8090  isucon@163.43.144.13
