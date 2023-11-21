@@ -89,6 +89,7 @@ type IsuCondition struct {
 	IsSitting  bool      `db:"is_sitting"`
 	Condition  string    `db:"condition"`
 	Message    string    `db:"message"`
+	Level      string    `db:"level"`
 	CreatedAt  time.Time `db:"created_at"`
 }
 
@@ -1011,51 +1012,47 @@ func getIsuConditionsFromDB(db *sqlx.DB, jiaIsuUUID string, endTime time.Time, c
 	limit int, isuName string) ([]*GetIsuConditionResponse, error) {
 
 	conditions := []IsuCondition{}
-	var err error
+	conditionLevelArray := []string{}
+	for level := range conditionLevel {
+		conditionLevelArray = append(conditionLevelArray, level)
+	}
+	query, param, err := sqlx.In("SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
+		"	AND `timestamp` < ?"+
+		"	AND ? <= `timestamp`"+
+		"	AND `level` IN (?)"+
+		"	ORDER BY `timestamp` DESC LIMIT ?", jiaIsuUUID, endTime, startTime, conditionLevelArray, limit)
 
 	if startTime.IsZero() {
-		err = db.Select(&conditions,
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
-				"	AND `timestamp` < ?"+
-				"	ORDER BY `timestamp` DESC",
-			jiaIsuUUID, endTime,
-		)
-	} else {
-		err = db.Select(&conditions,
-			"SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
-				"	AND `timestamp` < ?"+
-				"	AND ? <= `timestamp`"+
-				"	ORDER BY `timestamp` DESC",
-			jiaIsuUUID, endTime, startTime,
-		)
+		query, param, err = sqlx.In("SELECT * FROM `isu_condition` WHERE `jia_isu_uuid` = ?"+
+			"	AND `timestamp` < ?"+
+			"	AND `level` IN (?)"+
+			"	ORDER BY `timestamp` DESC LIMIT ?", jiaIsuUUID, endTime, conditionLevelArray, limit)
 	}
+	if err != nil {
+		return nil, fmt.Errorf("query error: %v", err)
+	}
+	err = db.Select(&conditions, query, param...)
 	if err != nil {
 		return nil, fmt.Errorf("db error: %v", err)
 	}
 
 	conditionsResponse := []*GetIsuConditionResponse{}
-	for _, c := range conditions {
-		cLevel, err := calculateConditionLevel(c.Condition)
+	for _, condition := range conditions {
 		if err != nil {
-			continue
+			return nil, err
 		}
 
-		if _, ok := conditionLevel[cLevel]; ok {
-			data := GetIsuConditionResponse{
-				JIAIsuUUID:     c.JIAIsuUUID,
-				IsuName:        isuName,
-				Timestamp:      c.Timestamp.Unix(),
-				IsSitting:      c.IsSitting,
-				Condition:      c.Condition,
-				ConditionLevel: cLevel,
-				Message:        c.Message,
-			}
-			conditionsResponse = append(conditionsResponse, &data)
+		data := GetIsuConditionResponse{
+			JIAIsuUUID:     condition.JIAIsuUUID,
+			IsuName:        isuName,
+			Timestamp:      condition.Timestamp.Unix(),
+			IsSitting:      condition.IsSitting,
+			Condition:      condition.Condition,
+			ConditionLevel: condition.Level,
+			Message:        condition.Message,
 		}
-	}
+		conditionsResponse = append(conditionsResponse, &data)
 
-	if len(conditionsResponse) > limit {
-		conditionsResponse = conditionsResponse[:limit]
 	}
 
 	return conditionsResponse, nil
@@ -1204,7 +1201,10 @@ func postIsuCondition(c echo.Context) error {
 	var rows []IsuCondition
 	for _, cond := range req {
 		timestamp := time.Unix(cond.Timestamp, 0)
-
+		conditionLevel, err := calculateConditionLevel(cond.Condition)
+		if err != nil {
+			return c.String(http.StatusBadRequest, "bad request body")
+		}
 		if !isValidConditionFormat(cond.Condition) {
 			return c.String(http.StatusBadRequest, "bad request body")
 		}
@@ -1214,6 +1214,7 @@ func postIsuCondition(c echo.Context) error {
 			IsSitting:  cond.IsSitting,
 			Condition:  cond.Condition,
 			Message:    cond.Message,
+			Level:      conditionLevel,
 		})
 
 		// _, err = tx.Exec(
@@ -1229,8 +1230,8 @@ func postIsuCondition(c echo.Context) error {
 	}
 	_, err = tx.NamedExec(
 		"INSERT INTO `isu_condition`"+
-			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`)"+
-			"	VALUES (:jia_isu_uuid, :timestamp, :is_sitting, :condition, :message)", rows)
+			"	(`jia_isu_uuid`, `timestamp`, `is_sitting`, `condition`, `message`, `level`)"+
+			"	VALUES (:jia_isu_uuid, :timestamp, :is_sitting, :condition, :message, :level)", rows)
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
