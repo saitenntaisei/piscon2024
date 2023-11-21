@@ -69,7 +69,6 @@ pprof-record:
 go-check:
 	$(eval latest := $(shell ls -rt pprof/ | tail -n 1))
 	go tool pprof -http=localhost:8090 pprof/$(latest)
-	go tool pprof -http=localhost:8070 fgprof/$(latest)
 
 .PHONY: analyze
 analyze:
