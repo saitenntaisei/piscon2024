@@ -13,6 +13,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -35,6 +36,7 @@ const (
 	jiaJWTSigningKeyPath        = "../ec256-public.pem"
 	defaultIconFilePath         = "../NoImage.jpg"
 	defaultJIAServiceURL        = "http://localhost:5000"
+	isuImagesPath               = "../isu-images"
 	mysqlErrNumDuplicateEntry   = 1062
 	conditionLevelInfo          = "info"
 	conditionLevelWarning       = "warning"
@@ -576,6 +578,12 @@ func postIsu(c echo.Context) error {
 		}
 	}
 
+	err = os.WriteFile(filepath.Join(isuImagesPath, jiaIsuUUID), image, 0644)
+	if err != nil {
+		c.Logger().Errorf("write image file error: %v", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	tx, err := db.Beginx()
 	if err != nil {
 		c.Logger().Errorf("db error: %v", err)
@@ -583,9 +591,8 @@ func postIsu(c echo.Context) error {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec("INSERT INTO `isu`"+
-		"	(`jia_isu_uuid`, `name`, `image`, `jia_user_id`) VALUES (?, ?, ?, ?)",
-		jiaIsuUUID, isuName, image, jiaUserID)
+	_, err = tx.Exec("INSERT INTO `isu` (`jia_isu_uuid`, `name`, `jia_user_id`) VALUES (?, ?, ?)", jiaIsuUUID, isuName, jiaUserID)
+
 	if err != nil {
 		mysqlErr, ok := err.(*mysql.MySQLError)
 
@@ -707,9 +714,8 @@ func getIsuIcon(c echo.Context) error {
 
 	jiaIsuUUID := c.Param("jia_isu_uuid")
 
-	var image []byte
-	err = db.Get(&image, "SELECT `image` FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?",
-		jiaUserID, jiaIsuUUID)
+	var count int
+	err = db.Get(&count, "SELECT COUNT(*) FROM `isu` WHERE `jia_user_id` = ? AND `jia_isu_uuid` = ?", jiaUserID, jiaIsuUUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return c.String(http.StatusNotFound, "not found: isu")
@@ -718,8 +724,11 @@ func getIsuIcon(c echo.Context) error {
 		c.Logger().Errorf("db error: %v", err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
-
-	return c.Blob(http.StatusOK, "", image)
+	if count == 0 {
+		return c.String(http.StatusNotFound, "not found: isu")
+	}
+	c.Response().Header().Set("X-Accel-Redirect", "/isu-images/"+jiaIsuUUID)
+	return c.NoContent(http.StatusOK)
 }
 
 // GET /api/isu/:jia_isu_uuid/graph
