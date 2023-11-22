@@ -233,6 +233,7 @@ mv-logs:
 	sudo touch $(DB_SLOW_LOG)
 	sudo chmod 777 $(DB_SLOW_LOG)
 	sudo systemctl restart mysql
+	sudo rm -rf ./$(SERVER_ID)/logs/*
 
 .PHONY: watch-service-log
 watch-service-log:
