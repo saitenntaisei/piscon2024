@@ -149,9 +149,6 @@ git-setup:
 	git config --global user.email "github-actions[bot]@users.noreply.github.com"
 	git config --global init.defaultbranch main
 
-	# deploykeyの作成
-	ssh-keygen -t ed25519
-
 .PHONY: check-server-id
 check-server-id:
 ifdef SERVER_ID
