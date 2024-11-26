@@ -123,11 +123,10 @@ set-nginx-alp-ltsv:
 
 .PHONY: install-tools
 install-tools:
-	sudo apt update
-	sudo apt upgrade
+	sudo apt update -y
+	sudo apt upgrade -y
 	sudo apt install -y percona-toolkit dstat git unzip snapd graphviz tree htop
 	sudo apt install -y build-essential curl wget vim
-
 
 	# alpのインストール
 	wget https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_amd64.zip
@@ -140,7 +139,7 @@ install-tools:
 	rm tbls.deb
 
 	# netdataのインストール
-	- wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry
+	- wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --no-updates --stable-channel --disable-telemetry --yes
 
 .PHONY: git-setup
 git-setup:
