@@ -159,15 +159,18 @@ endif
 
 .PHONY: set-as-s1
 set-as-s1:
+	touch ~/env.sh
 	echo "SERVER_ID=s1" >> ~/env.sh
 
 .PHONY: set-as-s2
 set-as-s2:
-	echo "SERVER_ID=s2" >> env.sh
+	touch ~/env.sh
+	echo "SERVER_ID=s2" >> ~/env.sh
 
 .PHONY: set-as-s3
 set-as-s3:
-	echo "SERVER_ID=s3" >> env.sh
+	touch ~/env.sh
+	echo "SERVER_ID=s3" >> ~/env.sh
 
 .PHONY: get-db-conf
 get-db-conf:
