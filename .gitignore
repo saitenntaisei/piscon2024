@@ -1,5 +1,7 @@
 .vscode
 
+isucon12-final
+
 .*
 !.gitignore
 bench
