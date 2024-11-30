@@ -5,7 +5,7 @@ include env.sh
 
 # 問題によって変わる変数
 USER:=isucon
-BIN_NAME:=isucondition
+BIN_NAME:=isuconquest
 BUILD_DIR:=/home/isucon/webapp/go
 SERVICE_NAME:=$(BIN_NAME).go.service
 
